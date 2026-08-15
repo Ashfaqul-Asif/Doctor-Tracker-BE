@@ -41,7 +41,7 @@ async function main(): Promise<void> {
   await connectDb();
   await seedAll();
 
-  const { createApp } = await import('../expressApp.js');
+  const { createApp } = await import('../index.js');
   const { env } = await import('../config/env.js');
 
   const app = createApp();
