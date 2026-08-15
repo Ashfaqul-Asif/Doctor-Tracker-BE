@@ -85,9 +85,19 @@ if (!parsed.success) {
   const details = parsed.error.issues
     .map((i) => `  - ${i.path.join('.') || '(root)'}: ${i.message}`)
     .join('\n');
-  // Logger depends on env, so this one case writes directly to stderr.
-  console.error(`\nInvalid environment configuration:\n${details}\n`);
-  process.exit(1);
+
+  /**
+   * Throw, don't process.exit(1).
+   *
+   * On a normal long-lived process this exited cleanly with a clear message on
+   * stderr. Inside a Vercel serverless function there is no such clean exit —
+   * calling process.exit() mid-invocation is unsafe in that runtime and produces
+   * an opaque "This Serverless Function has crashed" / FUNCTION_INVOCATION_FAILED
+   * with no indication of WHY, instead of the actual missing/invalid variable
+   * names. A thrown Error, by contrast, surfaces its message directly in Vercel's
+   * function logs — which is the whole point of validating env vars up front.
+   */
+  throw new Error(`Invalid environment configuration:\n${details}`);
 }
 
 export const env = parsed.data;
