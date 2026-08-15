@@ -140,7 +140,11 @@ function getConnection() {
 export default async function handler(req: IncomingMessage, res: ServerResponse): Promise<void> {
   try {
     await getConnection();
-  } catch {
+  } catch (err) {
+    // Without this, the real cause (bad Atlas credentials, IP not allowlisted, a
+    // missing env var) is completely invisible — the client only ever sees the
+    // same generic 503, and Vercel's function logs show nothing at all about why.
+    logger.error({ err }, 'Database connection failed for this request');
     res.statusCode = 503;
     res.setHeader('Content-Type', 'application/json');
     res.end(
