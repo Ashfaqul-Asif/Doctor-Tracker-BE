@@ -1,16 +1,26 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
-import { createApp } from '../src/app.js';
-import { connectDb } from '../src/config/db.js';
+import { createApp } from './app.js';
+import { connectDb } from './config/db.js';
 
 /**
- * Vercel serverless entry point.
+ * Vercel serverless entry point — SOURCE file.
+ *
+ * This is bundled by `scripts/build-vercel-function.mjs` into a single flat
+ * `api/index.cjs`, which is what Vercel actually deploys. It does not live directly
+ * under `api/` as source, because the earlier version did (importing across the
+ * `api/` -> `src/` boundary with relative `../src/...js` paths) and Vercel's
+ * zero-config Node builder mis-resolved that: production logs showed it trying to
+ * invoke `/var/task/src/app.js` itself as the function handler and rejecting it for
+ * having no default export, instead of treating `api/index.ts` as the entry and
+ * `src/app.ts` as its dependency. Pre-bundling into one file removes that class of
+ * cross-directory-import ambiguity entirely — there is nothing left for a builder to
+ * misidentify.
  *
  * server.ts's app.listen() has no meaning here — there is no long-lived process to
  * bind a port on. Vercel instead calls this file's default export as a plain
- * (req, res) handler for every request, per invocation.
- *
- * vercel.json rewrites every path to this one function, so it must handle /health
- * as well as everything under /api/v1 — exactly what createApp() already does.
+ * (req, res) handler for every request, per invocation. vercel.json rewrites every
+ * path to this one function, so it must handle /health as well as everything under
+ * /api/v1 — exactly what createApp() already does.
  */
 
 const app = createApp();

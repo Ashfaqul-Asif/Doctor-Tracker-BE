@@ -6,6 +6,10 @@ node_modules/
 dist/
 coverage/
 
+# Generated fresh on every Vercel deploy by `npm run vercel-build` (see
+# scripts/build-vercel-function.mjs) — a build artifact, not source.
+api/
+
 *.log
 npm-debug.log*
 .DS_Store
