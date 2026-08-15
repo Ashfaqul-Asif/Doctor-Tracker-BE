@@ -1,26 +1,29 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
-import { createApp } from './app.js';
+import { createApp } from './expressApp.js';
 import { connectDb } from './config/db.js';
 
 /**
- * Vercel serverless entry point — SOURCE file.
+ * Vercel's zero-configuration Express entry point.
  *
- * This is bundled by `scripts/build-vercel-function.mjs` into a single flat
- * `api/index.cjs`, which is what Vercel actually deploys. It does not live directly
- * under `api/` as source, because the earlier version did (importing across the
- * `api/` -> `src/` boundary with relative `../src/...js` paths) and Vercel's
- * zero-config Node builder mis-resolved that: production logs showed it trying to
- * invoke `/var/task/src/app.js` itself as the function handler and rejecting it for
- * having no default export, instead of treating `api/index.ts` as the entry and
- * `src/app.ts` as its dependency. Pre-bundling into one file removes that class of
- * cross-directory-import ambiguity entirely — there is nothing left for a builder to
- * misidentify.
+ * Per Vercel's own docs (https://vercel.com/docs/frameworks/backend/express), it
+ * scans for a file at one of a fixed set of conventional locations — app, index, or
+ * server, at the project root or under src/ — that imports `express` and exports the
+ * application as a default export (or calls app.listen()). Finding such a file, it
+ * deploys the whole thing as a single Vercel Function automatically: no api/ folder,
+ * no vercel.json rewrites needed.
  *
- * server.ts's app.listen() has no meaning here — there is no long-lived process to
- * bind a port on. Vercel instead calls this file's default export as a plain
- * (req, res) handler for every request, per invocation. vercel.json rewrites every
- * path to this one function, so it must handle /health as well as everything under
- * /api/v1 — exactly what createApp() already does.
+ * This is exactly why earlier attempts at a hand-rolled api/index.ts + custom
+ * vercel.json failed: src/app.ts ALSO matched that convention (it imports express
+ * and lives at src/app.ts) but only exported a named factory function (`createApp`),
+ * never a default export or a port listener. Vercel's scanner found it, expected a
+ * default-exported app or server, and crashed with "Invalid export found... default
+ * export must be a function or server" — before our custom api/ function was ever
+ * involved. Renaming that file to expressApp.ts (see there) removes it from the scan
+ * entirely; this file is the one Vercel is meant to find instead.
+ *
+ * The docs say the default export must be "a function or server" — a plain
+ * (req, res) handler function satisfies that, which is what's needed here anyway to
+ * gate every request on the database connection being ready first.
  */
 
 const app = createApp();

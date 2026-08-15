@@ -1,5 +1,5 @@
 import type { Server } from 'node:http';
-import { createApp } from './app.js';
+import { createApp } from './expressApp.js';
 import { env } from './config/env.js';
 import { logger } from './config/logger.js';
 import { connectDb, disconnectDb } from './config/db.js';

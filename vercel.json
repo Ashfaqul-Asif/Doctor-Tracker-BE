@@ -1,7 +1,0 @@
-{
-  "buildCommand": "npm run vercel-build",
-  "functions": {
-    "api/index.cjs": {}
-  },
-  "rewrites": [{ "source": "/(.*)", "destination": "/api" }]
-}

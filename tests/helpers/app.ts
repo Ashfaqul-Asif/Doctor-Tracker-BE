@@ -21,7 +21,7 @@ let cachedApp: Express | null = null;
  */
 export async function getApp(): Promise<Express> {
   if (!cachedApp) {
-    const { createApp } = await import('../../src/app.js');
+    const { createApp } = await import('../../src/expressApp.js');
     cachedApp = createApp();
   }
   return cachedApp;
