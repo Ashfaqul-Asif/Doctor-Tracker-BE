@@ -1,0 +1,23 @@
+.env
+.env.*
+!.env.example
+
+node_modules/
+dist/
+coverage/
+
+*.log
+npm-debug.log*
+.DS_Store
+jar.txt
+.vitest/
+
+# Claude Code's local state — machine-specific, never shared.
+.claude/
+CLAUDE.md
+
+# OS / editor cruft
+Thumbs.db
+.vscode/
+.idea/
+*.swp
